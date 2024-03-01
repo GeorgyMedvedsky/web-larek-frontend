@@ -40,6 +40,8 @@ npm run build
 ```
 yarn build
 ```
+![Архитектура](https://github.com/GeorgyMedvedsky/web-larek-frontend/assets/129301270/2f6009cc-3edb-4d11-95f5-9959bd4ee05a)
+
 ## Описание данных
 
 ### Компоненты модели данных
