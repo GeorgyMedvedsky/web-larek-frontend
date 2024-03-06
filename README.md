@@ -42,6 +42,7 @@ yarn build
 ```
 ## Архитектура
 
+![Архитектура_ WEB-ларёк](https://github.com/GeorgyMedvedsky/web-larek-frontend/assets/129301270/32a124f1-cbe7-4e9b-9bd5-912309e802a0)
 
 ## Описание данных
 Приложение спроектированно по шаблону MVP с index.ts в качестве Presenter
