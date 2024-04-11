@@ -1,6 +1,6 @@
-export interface ICatalog {
-    data: IProduct[];
-    selectedItem: IProduct | null;
+export interface IAppState {
+    catalog: IProduct[];
+    preview: IProduct | null;
 }
 
 export interface IProduct {
@@ -9,39 +9,51 @@ export interface IProduct {
     image: string;
     title: string;
     category: string;
-    price: number | null;
+    price: number | null | string;
 }
 
-export interface ICart {
-    data: IProduct[];
-    totalPrice: number;
+export interface IPage {
+    catalog: HTMLElement[];
+    wrapper: HTMLElement;
 }
 
-export interface IOrder {
-    adress: string;
-    email: string;
-    phone: number;
-    payment: string;
-    price: number;
-    items: string[];
+export interface ICardActions {
+    onClick: (event: MouseEvent) => void;
 }
 
-export interface IModal<T> {
-    state: boolean;
-    content: T;
+export interface IModalData {
+    content: HTMLElement;
 }
 
-enum Events {
-    CATALOG_UPDATE = 'catalog:changed',
-    PRODUCT_SELECT = 'catalog:selected',
-    PRODUCT_UPDATE = 'product:changed',
-    CART_UPDATE = 'cart:changed',
-    ORDER_UPDATE = 'order:changed',
+export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
 
-    UI_PRODUCT_SELECT = 'ui:catalog-selected',
-    UI_PRODUCT_SHOW = 'ui:product-show',
-    UI_CART_SHOW = 'ui:cart-show',
-    UI_FORM_SUBMIT = 'ui:form-submit',
-    UI_MODAL_SHOW = 'ui:modal-show',
-    UI_MODAL_HIDE = 'ui:modal-hide'
+export type CatalogChangeEvent = IProduct[];
+
+export enum Events {
+    CATALOG_CHANGED = 'catalog:changed',
+    MODAL_OPEN = 'modal:open',
+    MODAL_CLOSE = 'modal:close',
+    CARD_SELECT = 'card:select',
+    PREVIEW_CHANGED = 'preview:changed',
 }
+
+// export interface ICart {
+//     items: IProduct [];
+//     totalPrice: number;
+
+//     addItem(item: IProduct):void;
+//     removeItem(productId: Pick<IProduct, 'id'>):void;
+//     getItems():IProduct [];
+// }
+
+// export interface IOrder {
+//     payment: string;
+//     adress: string;
+//     email: string;
+//     phone: number;
+//     items: IProduct [];
+//     price: number;
+    
+//     setOrder(data: IOrder):void;
+//     getOrder(): IOrder;
+// }
