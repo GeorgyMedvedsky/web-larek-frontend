@@ -1,22 +1,19 @@
 import { View } from "../base/View";
 import { ensureElement } from "../../utils/utils";
-import { ICardActions, IProduct, TCardItem } from "../../types";
+import { ICardActions, IProduct, TCardItem, TCardItemCompact } from "../../types";
 
 export class Card<T> extends View<IProduct> {
     protected _title: HTMLElement;
-    protected _image: HTMLImageElement;
-    protected _description: HTMLElement;
     protected _price: HTMLElement;
-    protected _category: HTMLElement;
+    protected _image?: HTMLImageElement;
+    protected _description?: HTMLElement;
+    protected _category?: HTMLElement;
     protected _button?: HTMLButtonElement;
 
     constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
         super(container);
 
         this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
-        this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
-        this._description = container.querySelector(`.${blockName}__text`);
-        this._category = ensureElement<HTMLElement>(`.${blockName}__category`, container);
         this._price = ensureElement<HTMLElement>(`.${blockName}__price`, container);
         this._button = container.querySelector(`.${blockName}__button`);
 
@@ -45,16 +42,26 @@ export class Card<T> extends View<IProduct> {
         return this._title.textContent || '';
     }
 
+    set price(value: string) {
+        this.setText(this._price, value);
+    }
+}
+
+export class CardItem extends Card<TCardItem> {
+    constructor(container: HTMLElement, actions?: ICardActions) {
+        super('card', container, actions);
+
+        this._image = ensureElement<HTMLImageElement>(`.${this.blockName}__image`, container);
+        this._description = container.querySelector(`.${this.blockName}__text`);
+        this._category = ensureElement<HTMLElement>(`.${this.blockName}__category`, container);
+    }
+
     set image(value: string) {
         this.setImage(this._image, value, this.title)
     }
 
     set category(value: string) {
         this.setText(this._category, value);
-    }
-
-    set price(value: string) {
-        this.setText(this._price, value);
     }
 
     set description(value: string | string[]) {
@@ -70,7 +77,7 @@ export class Card<T> extends View<IProduct> {
     }
 }
 
-export class CardItem extends Card<TCardItem> {
+export class CardItemCompact extends Card<TCardItemCompact> {
     constructor(container: HTMLElement, actions?: ICardActions) {
         super('card', container, actions);
     }

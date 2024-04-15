@@ -6,9 +6,10 @@ import { cloneTemplate, createElement, ensureElement } from "./utils/utils";
 import { Events, IProduct } from './types';
 import { AppState } from './components/AppData';
 import { Page } from './components/Page';
-import { CardItem } from './components/common/Card';
+import { CardItem, CardItemCompact } from './components/common/Card';
 import { CatalogChangeEvent } from './types/index';
 import { Modal } from './components/common/Modal';
+import { Cart } from './components/common/Cart';
 
 const events = new EventEmitter();
 const api = new LarekApi(CDN_URL, API_URL);
@@ -29,6 +30,9 @@ const appData = new AppState({}, events);
 const page = new Page(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
+const cart = new Cart(cloneTemplate(basketTemplate), events);
+
+// Обновить каталог
 events.on<CatalogChangeEvent>(Events.CATALOG_CHANGED, () => {
     page.catalog = appData.catalog.map(item => {
         const card = new CardItem(cloneTemplate(cardCatalogTemplate), {
@@ -46,7 +50,9 @@ events.on<CatalogChangeEvent>(Events.CATALOG_CHANGED, () => {
 // Открыть карточку
 events.on(Events.CARD_SELECT, (item: IProduct) => {
     appData.setPreview(item);
-    const card = new CardItem(cloneTemplate(cardPreviewTemplate));
+    const card = new CardItem(cloneTemplate(cardPreviewTemplate), {
+        onClick: () => events.emit(Events.CART_CHANGED, item)
+    });
     modal.render({
         content: card.render({
             title: item.title,
@@ -55,6 +61,52 @@ events.on(Events.CARD_SELECT, (item: IProduct) => {
             price: `${item.price} синапсов`,
             description: item.description
         })
+    });
+});
+
+// Обновить состав корзины
+events.on(Events.CART_CHANGED, (item: IProduct) => {
+    appData.addCartItem(item);
+    appData.setTotalPrice(appData.cart.items);
+    cart.total = `${appData.cart.totalPrice} синапсов`;
+    page.counter = appData.cart.items.length;
+    cart.items = appData.cart.items.map(item => {
+        const card = new CardItemCompact(cloneTemplate(cardBasketTemplate), {
+            onClick: () => {
+                appData.removeCartItem(item.id);
+                appData.setTotalPrice(appData.cart.items);
+                cart.total = `${appData.cart.totalPrice} синапсов`;
+                page.counter = appData.cart.items.length;
+                cart.items = appData.cart.items.map(item => {
+                    const card = new CardItemCompact(cloneTemplate(cardBasketTemplate), {
+                        onClick: () => {
+                                appData.removeCartItem(item.id);
+                                appData.setTotalPrice(appData.cart.items);
+                                cart.total = `${appData.cart.totalPrice} синапсов`;
+                                page.counter = appData.cart.items.length;
+                                cart.items = appData.cart.items.map(item => card.render(item));
+                        }
+                    });
+                    return card.render({
+                        title: item.title,
+                        price: `${item.price} синапсов`
+                    });
+                });
+            }
+        });
+        return card.render({
+            title: item.title,
+            price: `${item.price} синапсов`
+        });
+    });
+});
+
+// Открыть корзину
+events.on(Events.CART_OPEN, () => {
+    modal.render({
+        content: createElement<HTMLElement>('div', {}, [
+            cart.render()
+        ])
     });
 });
 

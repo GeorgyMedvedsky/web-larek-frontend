@@ -1,6 +1,10 @@
 export interface IAppState {
     catalog: IProduct[];
     preview: IProduct | null;
+    cart: {
+        items: IProduct[];
+        totalPrice: number;
+    }
 }
 
 export interface IProduct {
@@ -15,19 +19,27 @@ export interface IProduct {
 export interface IPage {
     catalog: HTMLElement[];
     wrapper: HTMLElement;
-}
-
-export interface ICardActions {
-    onClick: (event: MouseEvent) => void;
+    basket: HTMLElement;
 }
 
 export interface IModalData {
     content: HTMLElement;
 }
 
+export interface ICartView {
+    items: HTMLElement[];
+    total: number;
+}
+
 export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
 
+export type TCardItemCompact = Pick<IProduct, 'title' | 'price'>;
+
 export type CatalogChangeEvent = IProduct[];
+
+export interface ICardActions {
+    onClick: (event: MouseEvent) => void;
+}
 
 export enum Events {
     CATALOG_CHANGED = 'catalog:changed',
@@ -35,25 +47,7 @@ export enum Events {
     MODAL_CLOSE = 'modal:close',
     CARD_SELECT = 'card:select',
     PREVIEW_CHANGED = 'preview:changed',
+    CART_OPEN = 'cart:open',
+    CART_CHANGED = 'cart:changed',
+    ORDER_OPEN = 'order:open'
 }
-
-// export interface ICart {
-//     items: IProduct [];
-//     totalPrice: number;
-
-//     addItem(item: IProduct):void;
-//     removeItem(productId: Pick<IProduct, 'id'>):void;
-//     getItems():IProduct [];
-// }
-
-// export interface IOrder {
-//     payment: string;
-//     adress: string;
-//     email: string;
-//     phone: number;
-//     items: IProduct [];
-//     price: number;
-    
-//     setOrder(data: IOrder):void;
-//     getOrder(): IOrder;
-// }

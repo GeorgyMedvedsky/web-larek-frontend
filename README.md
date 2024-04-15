@@ -40,9 +40,6 @@ npm run build
 ```
 yarn build
 ```
-<!-- ## Архитектура -->
-
-<!-- ![Архитектура_ WEB-ларёк](https://github.com/GeorgyMedvedsky/web-larek-frontend/assets/129301270/32a124f1-cbe7-4e9b-9bd5-912309e802a0) -->
 
 ## Данные и типы данных
 
@@ -52,6 +49,10 @@ yarn build
 export interface IAppState {
     catalog: IProduct[];
     preview: IProduct | null;
+    cart: {
+        items: IProduct[];
+        totalPrice: number;
+    }
 }
 ```
 
@@ -59,12 +60,12 @@ export interface IAppState {
 
 ```
 export interface IProduct {
-    _id: string;
+    id: string;
     description: string;
     image: string;
     title: string;
     category: string;
-    price: number | null;
+    price: number | null | string;
 }
 ```
 
@@ -74,14 +75,7 @@ export interface IProduct {
 export interface IPage {
     catalog: HTMLElement[];
     wrapper: HTMLElement;
-}
-```
-
-Действие с карточкой
-
-```
-export interface ICardActions {
-    onClick: (event: MouseEvent) => void;
+    basket: HTMLElement;
 }
 ```
 
@@ -93,16 +87,54 @@ export interface IModalData {
 }
 ```
 
-Карточка товара в каталоге
+Отображение корзины
+
+```
+export interface ICartView {
+    items: HTMLElement[];
+    total: number;
+}
+```
+
+Базовая карточка товара
 
 ```
 export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
+```
+
+Карточка товара в корзине
+
+```
+export type TCardItemCompact = Pick<IProduct, 'title' | 'price'>;
 ```
 
 Изменение каталога
 
 ```
 export type CatalogChangeEvent = IProduct[];
+```
+
+Действие с карточкой
+
+```
+export interface ICardActions {
+    onClick: (event: MouseEvent) => void;
+}
+```
+
+События в приложении
+
+```
+export enum Events {
+    CATALOG_CHANGED = 'catalog:changed',
+    MODAL_OPEN = 'modal:open',
+    MODAL_CLOSE = 'modal:close',
+    CARD_SELECT = 'card:select',
+    PREVIEW_CHANGED = 'preview:changed',
+    CART_OPEN = 'cart:open',
+    CART_CHANGED = 'cart:changed',
+    ORDER_OPEN = 'order:open'
+}
 ```
 
 ## Архитектура
@@ -149,6 +181,13 @@ export type CatalogChangeEvent = IProduct[];
 - `category` - категория, к которой принадлежит товар,
 - `price` - цена товара
 
+#### Класс AppState
+Основная бизнес-логика приложения. Класс отвечает за хранение и изменение таких состояний, как:
+- `preview` - просмотр карточки товара,
+- `catalog` - каталог товаров,
+- `cart` - объект корзины, состоящий из коллекции товаров в корзине в поле `items` и итоговой стоимости корзины в поле `totalPrice`.
+Класс имеет методы упоавления всеми хранящимися в нем данными
+
 ### Классы представления
 
 Все классы представления отвечают за отображение внутри контейнера (DOM-элемент) передаваемых в них данных.
@@ -159,6 +198,21 @@ export type CatalogChangeEvent = IProduct[];
 Поля класса:
 - `content` - содержимое модального окна,
 - `events` - брокер событий.
+
+#### Класс Page
+Отвечает за отображение и обработку таких основных элементов на начальной странице, как:
+- `catalog` - каталог на начальном экране приложения,
+- `counter` - счетчик добавленных в корзину товаров,
+- `cart` - кнопка корзины, позволяющая получить доступ к экрану корзины,
+- `wrapper` - обертка, позволяющая ограничить прокрутку страницы при открытом модальном окне.
+
+#### Класс Card, CardItem, CardItemCompact
+Отвечают за вариативность отрисовки всех элементов карточек товаров.
+Классы `CardItem`, `CardItemCompact` расширяют `Card`, адаптируя отображение карточки под определенные условия, заданные в приложении.
+Данные для отрисовки получают с помощью геттеров и сеттеров
+
+#### Класс Cart
+Отвечает за отображение корзины и имеет два сеттера для указания значений `items` - список товаров, и `total` - итоговая стоимость корзины
 
 ### Слой коммуникации
 
