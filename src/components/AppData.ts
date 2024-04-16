@@ -38,6 +38,10 @@ export class AppState extends Model<IAppState> {
         this.emitChanges(Events.PREVIEW_CHANGED, item);
     }
 
+    isAddedToCart(item: IProduct):boolean {
+        return this.cart.items.includes(item);
+    }
+
     addCartItem(item: IProduct) {
         this.cart.items = [
             ...this.cart.items,

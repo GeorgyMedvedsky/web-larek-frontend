@@ -6,7 +6,7 @@ import { cloneTemplate, createElement, ensureElement } from "./utils/utils";
 import { Events, IProduct } from './types';
 import { AppState } from './components/AppData';
 import { Page } from './components/Page';
-import { CardItem, CardItemCompact } from './components/common/Card';
+import { Card, CardItem, CardItemCompact } from './components/common/Card';
 import { CatalogChangeEvent } from './types/index';
 import { Modal } from './components/common/Modal';
 import { Cart } from './components/common/Cart';
@@ -51,8 +51,36 @@ events.on<CatalogChangeEvent>(Events.CATALOG_CHANGED, () => {
 events.on(Events.CARD_SELECT, (item: IProduct) => {
     appData.setPreview(item);
     const card = new CardItem(cloneTemplate(cardPreviewTemplate), {
-        onClick: () => events.emit(Events.CART_CHANGED, item)
+        onClick: () => {
+            events.emit(Events.CART_CHANGED, item);
+            if(appData.isAddedToCart(item)) {
+                card.setDisabled(card.button, true);
+                card.button = 'Уже в корзине';
+                modal.render({
+                    content: card.render({
+                        title: item.title,
+                        image: item.image,
+                        category: item.category,
+                        price: `${item.price} синапсов`,
+                        description: item.description
+                    })
+                });
+            } else {
+                card.setDisabled(card.button, false);
+                card.button = 'В корзину';
+                modal.render({
+                    content: card.render({
+                        title: item.title,
+                        image: item.image,
+                        category: item.category,
+                        price: `${item.price} синапсов`,
+                        description: item.description
+                    })
+                });
+            }
+        }
     });
+    card.button = 'В корзину';
     modal.render({
         content: card.render({
             title: item.title,

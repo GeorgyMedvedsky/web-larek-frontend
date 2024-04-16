@@ -45,6 +45,14 @@ export class Card<T> extends View<IProduct> {
     set price(value: string) {
         this.setText(this._price, value);
     }
+
+    set button(value: string | HTMLElement) {
+        this.setText(this._button, value);
+    }
+
+    get button(): HTMLElement {
+        return this._button;
+    }
 }
 
 export class CardItem extends Card<TCardItem> {
