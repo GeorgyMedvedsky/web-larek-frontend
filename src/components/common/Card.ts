@@ -62,6 +62,25 @@ export class CardItem extends Card<TCardItem> {
 
     set category(value: string) {
         this.setText(this._category, value);
+        switch(value) {
+            case 'софт-скил': {
+                this.toggleClass(this._category, 'card__category_soft', true);
+                break;
+            }
+            case 'хард-скил': {
+                this.toggleClass(this._category, 'card__category_hard', true);
+                break;
+            }
+            case 'дополнительное': {
+                this.toggleClass(this._category, 'card__category_additional', true);
+                break;
+            }
+            case 'кнопка': {
+                this.toggleClass(this._category, 'card__category_button', true);
+                break;
+            }
+            default: this.toggleClass(this._category, 'card__category_other', true);
+        }
     }
 
     set description(value: string | string[]) {
