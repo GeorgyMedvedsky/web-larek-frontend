@@ -9,15 +9,14 @@ export class ProductItem extends Model<IProduct> {
     image: string;
     title: string;
     category: string;
-    price: number | null | string;
+    price: number | null;
 }
 
 export class AppState extends Model<IAppState> {
     catalog: IProduct[];
-    preview: IProduct | null;
     cart: {
         items: IProduct[];
-        totalPrice: string | number;
+        totalPrice: number;
     };
 
     constructor(data: Partial<IAppState>, events: IEvents) {
@@ -28,37 +27,31 @@ export class AppState extends Model<IAppState> {
         };
     }
 
-    setCatalog(items: IProduct[]) {
+    setCatalog(items: IProduct[]):void {
         this.catalog = items.map(item => new ProductItem(item, this.events));
-        this.emitChanges(Events.CATALOG_CHANGED, { catalog: this.catalog });
-    }
-
-    setPreview(item: IProduct) {
-        this.preview = item;
-        this.emitChanges(Events.PREVIEW_CHANGED, item);
+        this.emitChanges(Events.CATALOG_UPDATE, { catalog: this.catalog });
     }
 
     isAddedToCart(item: IProduct):boolean {
         return this.cart.items.includes(item);
     }
 
-    addCartItem(item: IProduct) {
+    addCartItem(item: IProduct):void {
         this.cart.items = [
             ...this.cart.items,
             item
         ];
     }
 
-    removeCartItem(id: string) {
+    removeCartItem(id: string):void {
         this.cart.items = this.cart.items.filter(item => item.id !== id);
     }
 
-    setTotalPrice(items: IProduct[]) {
+    setTotalPrice(items: IProduct[]):void {
         this.cart.totalPrice = items.reduce((acc, curr) => acc + Number(curr.price), 0);
     }
 
-    // clearCart() {
-    //     this.cart.items = [];
-    //     this.emitChanges(Events.CART_CHANGED, []);
-    // }
+    clearCart():void {
+        this.cart.items = [];
+    }
 }

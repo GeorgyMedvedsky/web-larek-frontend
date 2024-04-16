@@ -40,7 +40,7 @@ export class Cart extends View<ICartView> {
         }
     }
 
-    set total(total: number | string) {
-        this.setText(this._total, total);
+    set total(total: number) {
+        this.setText(this._total, `${total} синапсов`);
     }
 }

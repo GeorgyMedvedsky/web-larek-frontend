@@ -42,8 +42,10 @@ export class Card<T> extends View<IProduct> {
         return this._title.textContent || '';
     }
 
-    set price(value: string) {
-        this.setText(this._price, value);
+    set price(value: number | null) {
+        value === null
+            ? this.setText(this._price, 'Бесценно')
+            : this.setText(this._price, `${value} синапсов`);
     }
 
     set button(value: string | HTMLElement) {

@@ -3,11 +3,10 @@ import { LarekApi } from './components/LarekApi';
 import { API_URL, CDN_URL } from './utils/constants';
 import { EventEmitter } from './components/base/events';
 import { cloneTemplate, createElement, ensureElement } from "./utils/utils";
-import { Events, IProduct } from './types';
+import { Events, IProduct, CatalogChangeEvent } from './types';
 import { AppState } from './components/AppData';
 import { Page } from './components/Page';
-import { Card, CardItem, CardItemCompact } from './components/common/Card';
-import { CatalogChangeEvent } from './types/index';
+import { CardItem, CardItemCompact } from './components/common/Card';
 import { Modal } from './components/common/Modal';
 import { Cart } from './components/common/Cart';
 
@@ -33,98 +32,59 @@ const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const cart = new Cart(cloneTemplate(basketTemplate), events);
 
 // Обновить каталог
-events.on<CatalogChangeEvent>(Events.CATALOG_CHANGED, () => {
+events.on<CatalogChangeEvent>(Events.CATALOG_UPDATE, () => {
     page.catalog = appData.catalog.map(item => {
         const card = new CardItem(cloneTemplate(cardCatalogTemplate), {
             onClick: () => events.emit(Events.CARD_SELECT, item)
         });
-        return card.render({
-            title: item.title,
-            image: item.image,
-            category: item.category,
-            price: `${item.price} синапсов`
-        });
+        return card.render(item);
     });
 });
 
 // Открыть карточку
 events.on(Events.CARD_SELECT, (item: IProduct) => {
-    appData.setPreview(item);
     const card = new CardItem(cloneTemplate(cardPreviewTemplate), {
         onClick: () => {
-            events.emit(Events.CART_CHANGED, item);
-            if(appData.isAddedToCart(item)) {
-                card.setDisabled(card.button, true);
-                card.button = 'Уже в корзине';
-                modal.render({
-                    content: card.render({
-                        title: item.title,
-                        image: item.image,
-                        category: item.category,
-                        price: `${item.price} синапсов`,
-                        description: item.description
-                    })
-                });
-            } else {
-                card.setDisabled(card.button, false);
-                card.button = 'В корзину';
-                modal.render({
-                    content: card.render({
-                        title: item.title,
-                        image: item.image,
-                        category: item.category,
-                        price: `${item.price} синапсов`,
-                        description: item.description
-                    })
-                });
-            }
+            events.emit(Events.CART_UPDATE, item);
+            modal.close();
         }
     });
-    card.button = 'В корзину';
+    if(item.price === null) {
+        card.setDisabled(card.button, true);
+        card.button = 'Недоступно';
+    } else if (appData.isAddedToCart(item)) {
+        card.setDisabled(card.button, true);
+        card.button = 'Уже в корзине';
+    } else {
+        card.setDisabled(card.button, false);
+        card.button = 'В корзину';
+    }
     modal.render({
-        content: card.render({
-            title: item.title,
-            image: item.image,
-            category: item.category,
-            price: `${item.price} синапсов`,
-            description: item.description
-        })
+        content: card.render(item)
     });
 });
 
-// Обновить состав корзины
-events.on(Events.CART_CHANGED, (item: IProduct) => {
-    appData.addCartItem(item);
+// Обновить корзину
+events.on(Events.CART_UPDATE, (item: IProduct | IProduct[]) => {
+    if(Array.isArray(item)) {
+        appData.clearCart();
+        item.forEach((product: IProduct) => appData.addCartItem(product));
+    } else {
+        appData.addCartItem(item);
+    }
     appData.setTotalPrice(appData.cart.items);
-    cart.total = `${appData.cart.totalPrice} синапсов`;
+    cart.total = appData.cart.totalPrice;
     page.counter = appData.cart.items.length;
     cart.items = appData.cart.items.map(item => {
         const card = new CardItemCompact(cloneTemplate(cardBasketTemplate), {
             onClick: () => {
                 appData.removeCartItem(item.id);
-                appData.setTotalPrice(appData.cart.items);
-                cart.total = `${appData.cart.totalPrice} синапсов`;
-                page.counter = appData.cart.items.length;
-                cart.items = appData.cart.items.map(item => {
-                    const card = new CardItemCompact(cloneTemplate(cardBasketTemplate), {
-                        onClick: () => {
-                                appData.removeCartItem(item.id);
-                                appData.setTotalPrice(appData.cart.items);
-                                cart.total = `${appData.cart.totalPrice} синапсов`;
-                                page.counter = appData.cart.items.length;
-                                cart.items = appData.cart.items.map(item => card.render(item));
-                        }
-                    });
-                    return card.render({
-                        title: item.title,
-                        price: `${item.price} синапсов`
-                    });
-                });
+                events.emit(Events.CART_UPDATE, appData.cart.items);
             }
         });
         return card.render({
             title: item.title,
-            price: `${item.price} синапсов`
+            price: item.price
         });
     });
 });

@@ -1,6 +1,5 @@
 export interface IAppState {
     catalog: IProduct[];
-    preview: IProduct | null;
     cart: {
         items: IProduct[];
         totalPrice: number;
@@ -13,7 +12,7 @@ export interface IProduct {
     image: string;
     title: string;
     category: string;
-    price: number | null | string;
+    price: number | null;
 }
 
 export interface IPage {
@@ -42,12 +41,10 @@ export interface ICardActions {
 }
 
 export enum Events {
-    CATALOG_CHANGED = 'catalog:changed',
+    CATALOG_UPDATE = 'catalog:update',
+    CARD_SELECT = 'card:select',
+    CART_UPDATE = 'cart:update',
     MODAL_OPEN = 'modal:open',
     MODAL_CLOSE = 'modal:close',
-    CARD_SELECT = 'card:select',
-    PREVIEW_CHANGED = 'preview:changed',
     CART_OPEN = 'cart:open',
-    CART_CHANGED = 'cart:changed',
-    ORDER_OPEN = 'order:open'
 }

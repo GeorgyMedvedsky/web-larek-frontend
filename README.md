@@ -48,7 +48,6 @@ yarn build
 ```
 export interface IAppState {
     catalog: IProduct[];
-    preview: IProduct | null;
     cart: {
         items: IProduct[];
         totalPrice: number;
@@ -65,7 +64,7 @@ export interface IProduct {
     image: string;
     title: string;
     category: string;
-    price: number | null | string;
+    price: number | null;
 }
 ```
 
@@ -126,14 +125,12 @@ export interface ICardActions {
 
 ```
 export enum Events {
-    CATALOG_CHANGED = 'catalog:changed',
+    CATALOG_UPDATE = 'catalog:update',
+    CARD_SELECT = 'card:select',
+    CART_UPDATE = 'cart:update',
     MODAL_OPEN = 'modal:open',
     MODAL_CLOSE = 'modal:close',
-    CARD_SELECT = 'card:select',
-    PREVIEW_CHANGED = 'preview:changed',
     CART_OPEN = 'cart:open',
-    CART_CHANGED = 'cart:changed',
-    ORDER_OPEN = 'order:open'
 }
 ```
 
@@ -174,7 +171,7 @@ export enum Events {
 
 #### Класс ProductItem
 Отвечает за хранение данных о товаре, которые принимает в конструктор, не реализует возможность изменения этих данных:
-- `_id` - идентификатор товара,
+- `id` - идентификатор товара,
 - `description` - описание товара,
 - `image` - изображение товара,
 - `title` - название товара,
@@ -183,10 +180,21 @@ export enum Events {
 
 #### Класс AppState
 Основная бизнес-логика приложения. Класс отвечает за хранение и изменение таких состояний, как:
-- `preview` - просмотр карточки товара,
 - `catalog` - каталог товаров,
-- `cart` - объект корзины, состоящий из коллекции товаров в корзине в поле `items` и итоговой стоимости корзины в поле `totalPrice`.
-Класс имеет методы упоавления всеми хранящимися в нем данными
+- `cart` - объект корзины, состоящий из коллекции добавленных товаров в поле `items` и итоговой стоимости в поле `totalPrice`.
+
+Класс имеет методы управления всеми хранящимися в нем данными:
+- `setCatalog` - принимает параметром массив товаров и генерирует на его основе новый массив, который записывает в поле `catalog`, генерируя событие `CATALOG_UPDATE`(обновление каталога),
+
+- `isAddedToCart` - принимает параметром объект товара и проверяет его наличие в корзине, возвращая `true` или `false`,
+
+- `addCartItem` - принимает параметром объект товара и добавляет его в поле `items` как элемент массива,
+
+- `removeCartItem` - принимает параметром идентификатор товара в виде строки и перезаписывает массив товаров в поле `items`, исключая из него найденный объект,
+
+- `setTotalPrice` - принимает параметром массив товаров, высчитывает на его основе итоговую стоимость заказа и записывает полученное значение в поле `totalPrice`,
+
+- `clearCart` - очищает корзину, записывая в поле `items` пустой массив.
 
 ### Классы представления
 
