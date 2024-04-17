@@ -3,7 +3,8 @@ export interface IAppState {
     cart: {
         items: IProduct[];
         totalPrice: number;
-    }
+    };
+    order: IOrder;
 }
 
 export interface IProduct {
@@ -13,6 +14,15 @@ export interface IProduct {
     title: string;
     category: string;
     price: number | null;
+}
+
+export interface IOrder {
+    payment: string;
+    email: string;
+    phone: string;
+    address: string;
+    total: number;
+    items: string[];
 }
 
 export interface IPage {

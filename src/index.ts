@@ -98,6 +98,17 @@ events.on(Events.CART_OPEN, () => {
     });
 });
 
+console.log(appData.order)
+appData.order = {
+    payment: '',
+    email: '',
+    phone: '',
+    address: '',
+    total: 0,
+    items: []
+}
+console.log(appData.order)
+
 // Блокируем прокрутку страницы если открыта модалка
 events.on(Events.MODAL_OPEN, () => {
     page.locked = true;

@@ -1,5 +1,5 @@
 import { Model } from "./base/Model";
-import { IAppState, IProduct } from "../types";
+import { IAppState, IOrder, IProduct } from "../types";
 import { Events } from "../types";
 import { IEvents } from "./base/events";
 
@@ -18,6 +18,7 @@ export class AppState extends Model<IAppState> {
         items: IProduct[];
         totalPrice: number;
     };
+    protected _order: IOrder;
 
     constructor(data: Partial<IAppState>, events: IEvents) {
         super(data, events);
@@ -25,6 +26,21 @@ export class AppState extends Model<IAppState> {
             items: [],
             totalPrice: 0
         };
+    }
+
+    set order({...props}) {
+        this._order = {
+            payment: props.payment,
+            email: props.email,
+            phone: props.phone,
+            address: props.address,
+            total: props.total,
+            items: props.items
+        }
+    }
+
+    get order():IOrder {
+        return this._order;
     }
 
     setCatalog(items: IProduct[]):void {
