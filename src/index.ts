@@ -44,7 +44,7 @@ events.on(Events.CARD_SELECT, (item: IProduct) => {
     const card = new CardItem(cloneTemplate(cardPreviewTemplate), {
         onClick: () => {
             events.emit(Events.CART_UPDATE, item);
-            modal.close();
+            events.emit(Events.CARD_SELECT, item);
         }
     });
     if(item.price === null) {
