@@ -1,7 +1,8 @@
 import { View } from '../base/View';
 import { ICartView, Events } from '../../types/index';
 import { EventEmitter } from '../base/events';
-import {cloneTemplate, createElement, ensureElement, formatNumber} from "../../utils/utils";
+import { createElement, ensureElement, formatNumber} from "../../utils/utils";
+import { formTemplates } from '../../utils/constants';
 
 export class Cart extends View<ICartView> {
     protected _list: HTMLElement;
@@ -19,7 +20,7 @@ export class Cart extends View<ICartView> {
 
         if (this._button) {
             this._button.addEventListener('click', () => {
-                events.emit(Events.FORM_OPEN);
+                events.emit(Events.FORM_OPEN, formTemplates.order);
             });
         }
     }

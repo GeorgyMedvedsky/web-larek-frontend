@@ -9,6 +9,8 @@ import { Page } from './components/Page';
 import { CardItem, CardItemCompact } from './components/common/Card';
 import { Modal } from './components/common/Modal';
 import { Cart } from './components/common/Cart';
+import { Form } from './components/common/Form';
+import { Success } from './components/common/Success';
 
 const events = new EventEmitter();
 const api = new LarekApi(CDN_URL, API_URL);
@@ -19,16 +21,12 @@ const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog');
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview');
 const cardBasketTemplate = ensureElement<HTMLTemplateElement>('#card-basket');
 const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
-const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
-const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 
 // Модель данных приложения
 const appData = new AppState({}, events);
 
-// Глобальные контейнеры
 const page = new Page(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
-
 const cart = new Cart(cloneTemplate(basketTemplate), events);
 
 // Обновить каталог
@@ -98,7 +96,32 @@ events.on(Events.CART_OPEN, () => {
     });
 });
 
-events.on(Events.FORM_OPEN, () => {});
+// Открыть форму
+events.on(Events.FORM_OPEN, (formTemplate: HTMLTemplateElement) => {
+    const form = new Form(cloneTemplate(formTemplate), events);
+    modal.render({
+        content: form.render()
+    });
+});
+
+events.on(Events.FORM_SUBMIT, (formTemplate: HTMLTemplateElement) => {
+    const form = new Form(cloneTemplate(formTemplate), events);
+    modal.render({
+        content: form.render()
+    });
+});
+
+events.on(Events.ORDER_SUMBIT, () => {
+    const success = new Success(cloneTemplate(successTemplate),  {
+        onClick: () => {
+            modal.close();
+            appData.clearCart();
+        }
+    })
+    modal.render({
+        content: success.render()
+    });
+});
 
 // Блокируем прокрутку страницы если открыта модалка
 events.on(Events.MODAL_OPEN, () => {

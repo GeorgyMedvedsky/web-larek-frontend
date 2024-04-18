@@ -4,7 +4,7 @@ export interface IAppState {
         items: IProduct[];
         totalPrice: number;
     };
-    order: IOrder;
+    order: IOrderForm;
 }
 
 export interface IProduct {
@@ -16,7 +16,7 @@ export interface IProduct {
     price: number | null;
 }
 
-export interface IOrder {
+export interface IOrderForm {
     payment: string;
     email: string;
     phone: string;
@@ -57,5 +57,7 @@ export enum Events {
     MODAL_OPEN = 'modal:open',
     MODAL_CLOSE = 'modal:close',
     CART_OPEN = 'cart:open',
-    FORM_OPEN = 'form:open'
+    FORM_OPEN = 'form:open',
+    FORM_SUBMIT = 'form:submit',
+    ORDER_SUMBIT = 'order:success'
 }

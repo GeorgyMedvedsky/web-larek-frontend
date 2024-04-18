@@ -1,5 +1,5 @@
 import { Model } from "./base/Model";
-import { IAppState, IOrder, IProduct } from "../types";
+import { IAppState, IOrderForm, IProduct } from "../types";
 import { Events } from "../types";
 import { IEvents } from "./base/events";
 
@@ -18,7 +18,7 @@ export class AppState extends Model<IAppState> {
         items: IProduct[];
         totalPrice: number;
     };
-    protected _order: IOrder;
+    protected _order: IOrderForm;
 
     constructor(data: Partial<IAppState>, events: IEvents) {
         super(data, events);
@@ -39,7 +39,7 @@ export class AppState extends Model<IAppState> {
         }
     }
 
-    get order():IOrder {
+    get order():IOrderForm {
         return this._order;
     }
 
