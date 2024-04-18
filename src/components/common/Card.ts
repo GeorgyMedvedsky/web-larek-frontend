@@ -1,5 +1,5 @@
 import { View } from "../base/View";
-import { ensureElement } from "../../utils/utils";
+import { ensureElement, formatNumber } from "../../utils/utils";
 import { ICardActions, IProduct, TCardItem, TCardItemCompact } from "../../types";
 
 export class Card<T> extends View<IProduct> {
@@ -45,7 +45,7 @@ export class Card<T> extends View<IProduct> {
     set price(value: number | null) {
         value === null
             ? this.setText(this._price, 'Бесценно')
-            : this.setText(this._price, `${value} синапсов`);
+            : this.setText(this._price, `${formatNumber(value)} синапсов`);
     }
 
     set button(value: string | HTMLElement) {

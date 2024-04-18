@@ -57,4 +57,5 @@ export enum Events {
     MODAL_OPEN = 'modal:open',
     MODAL_CLOSE = 'modal:close',
     CART_OPEN = 'cart:open',
+    FORM_OPEN = 'form:open'
 }
