@@ -1,6 +1,10 @@
 import { View } from "../base/View";
 import { ensureElement, formatNumber } from "../../utils/utils";
-import { ICardActions, IProduct, TCardItem, TCardItemCompact } from "../../types";
+import { IProduct, TCardItem } from "../../types";
+
+interface ICardActions {
+    onClick: (event: MouseEvent) => void;
+}
 
 export class Card<T> extends View<IProduct> {
     protected _title: HTMLElement;
@@ -57,39 +61,63 @@ export class Card<T> extends View<IProduct> {
     }
 }
 
+interface CategorySettings {
+    names: CategorySettingsNames;
+    classes: CategorySettingsClasses;
+}
+
+type CategorySettingsNames = {
+    soft: string;
+    hard: string;
+    additional: string;
+    button: string;
+    other: string;
+};
+
+type CategorySettingsClasses = {
+    soft: string;
+    hard: string;
+    additional: string;
+    button: string;
+    other: string;
+};
+
 export class CardItem extends Card<TCardItem> {
-    constructor(container: HTMLElement, actions?: ICardActions) {
+    protected _categorySettings: CategorySettings;
+
+    constructor(container: HTMLElement, categorySettings: CategorySettings, actions?: ICardActions) {
         super('card', container, actions);
 
         this._image = ensureElement<HTMLImageElement>(`.${this.blockName}__image`, container);
         this._description = container.querySelector(`.${this.blockName}__text`);
         this._category = ensureElement<HTMLElement>(`.${this.blockName}__category`, container);
+        this._categorySettings = categorySettings;
     }
 
-    set image(value: string) {
+    set image(value: string) { 
         this.setImage(this._image, value, this.title)
     }
 
     set category(value: string) {
         this.setText(this._category, value);
         switch(value) {
-            case 'софт-скил': {
-                this.toggleClass(this._category, 'card__category_soft', true);
+            case this._categorySettings.names.soft: {
+                this.toggleClass(this._category, this._categorySettings.classes.soft, true);
                 break;
             }
-            case 'хард-скил': {
-                this.toggleClass(this._category, 'card__category_hard', true);
+            case this._categorySettings.names.hard: {
+                this.toggleClass(this._category, this._categorySettings.classes.hard, true);
                 break;
             }
-            case 'дополнительное': {
-                this.toggleClass(this._category, 'card__category_additional', true);
+            case this._categorySettings.names.additional: {
+                this.toggleClass(this._category, this._categorySettings.classes.additional, true);
                 break;
             }
-            case 'кнопка': {
-                this.toggleClass(this._category, 'card__category_button', true);
+            case this._categorySettings.names.button: {
+                this.toggleClass(this._category, this._categorySettings.classes.button, true);
                 break;
             }
-            default: this.toggleClass(this._category, 'card__category_other', true);
+            default: this.toggleClass(this._category, this._categorySettings.classes.other, true);
         }
     }
 
@@ -103,11 +131,5 @@ export class CardItem extends Card<TCardItem> {
         } else {
             this.setText(this._description, value);
         }
-    }
-}
-
-export class CardItemCompact extends Card<TCardItemCompact> {
-    constructor(container: HTMLElement, actions?: ICardActions) {
-        super('card', container, actions);
     }
 }

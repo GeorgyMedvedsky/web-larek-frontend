@@ -1,7 +1,13 @@
 import { View } from "./base/View";
-import { IEvents } from "./base/events";
+import { IEvents } from "./base/Events";
 import { ensureElement } from "../utils/utils";
-import { Events, IPage } from "../types";
+import { Events } from "../types";
+
+interface IPage {
+    catalog: HTMLElement[];
+    wrapper: HTMLElement;
+    basket: HTMLElement;
+}
 
 export class Page extends View<IPage> {
     protected _counter: HTMLElement;

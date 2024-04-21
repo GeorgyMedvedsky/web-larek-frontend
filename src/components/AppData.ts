@@ -1,7 +1,28 @@
 import { Model } from "./base/Model";
-import { IAppState, IOrderForm, IProduct } from "../types";
+import { IProduct } from "../types";
 import { Events } from "../types";
-import { IEvents } from "./base/events";
+import { IEvents } from "./base/Events";
+
+interface IAppState {
+    catalog: IProduct[];
+    cart: {
+        items: IProduct[];
+        totalPrice: number;
+    };
+    order: IOrderForm;
+}
+
+interface IOrderForm {
+    payment: string; 
+    email: string; 
+    phone: string; 
+    address: string;
+}
+
+interface IOrder extends IOrderForm {
+    total: number; 
+    items: string[]; 
+}
 
 export class ProductItem extends Model<IProduct> {
     id: string;
@@ -18,29 +39,24 @@ export class AppState extends Model<IAppState> {
         items: IProduct[];
         totalPrice: number;
     };
-    protected _order: IOrderForm;
+    order: IOrder;
 
     constructor(data: Partial<IAppState>, events: IEvents) {
         super(data, events);
+
         this.cart = {
             items: [],
             totalPrice: 0
         };
-    }
 
-    set order({...props}) {
-        this._order = {
-            payment: props.payment,
-            email: props.email,
-            phone: props.phone,
-            address: props.address,
-            total: props.total,
-            items: props.items
+        this.order = {
+            payment: '',
+            email: '',
+            phone: '',
+            address: '',
+            total: 0,
+            items: []
         }
-    }
-
-    get order():IOrderForm {
-        return this._order;
     }
 
     setCatalog(items: IProduct[]):void {

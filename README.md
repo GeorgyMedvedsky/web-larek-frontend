@@ -147,7 +147,6 @@ export enum Events {
     CART_OPEN = 'cart:open',
     FORM_OPEN = 'form:open',
     FORM_SUBMIT = 'form:submit',
-    ORDER_SUMBIT = 'order:success'
 }
 ```
 

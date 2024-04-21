@@ -1,12 +1,12 @@
 import './scss/styles.scss';
 import { LarekApi } from './components/LarekApi';
-import { API_URL, CDN_URL } from './utils/constants';
-import { EventEmitter } from './components/base/events';
+import { API_URL, CDN_URL, categorySettings, formNames, formTemplates } from './utils/constants';
+import { EventEmitter } from './components/base/Events';
 import { cloneTemplate, createElement, ensureElement } from "./utils/utils";
-import { Events, IProduct, CatalogChangeEvent } from './types';
+import { Events, IProduct, CatalogChange } from './types';
 import { AppState } from './components/AppData';
 import { Page } from './components/Page';
-import { CardItem, CardItemCompact } from './components/common/Card';
+import { Card, CardItem } from './components/common/Card';
 import { Modal } from './components/common/Modal';
 import { Cart } from './components/common/Cart';
 import { Form } from './components/common/Form';
@@ -28,11 +28,19 @@ const appData = new AppState({}, events);
 const page = new Page(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const cart = new Cart(cloneTemplate(basketTemplate), events);
+const orderForm = new Form(cloneTemplate(formTemplates.order), events);
+const contactsForm = new Form(cloneTemplate(formTemplates.contacts), events);
+const success = new Success(cloneTemplate(successTemplate),  {
+    onClick: () => {
+        modal.close();
+        appData.clearCart();
+    }
+})
 
 // Обновить каталог
-events.on<CatalogChangeEvent>(Events.CATALOG_UPDATE, () => {
+events.on<CatalogChange>(Events.CATALOG_UPDATE, () => {
     page.catalog = appData.catalog.map(item => {
-        const card = new CardItem(cloneTemplate(cardCatalogTemplate), {
+        const card = new CardItem(cloneTemplate(cardCatalogTemplate), categorySettings, {
             onClick: () => events.emit(Events.CARD_SELECT, item)
         });
         return card.render(item);
@@ -41,7 +49,7 @@ events.on<CatalogChangeEvent>(Events.CATALOG_UPDATE, () => {
 
 // Открыть карточку
 events.on(Events.CARD_SELECT, (item: IProduct) => {
-    const card = new CardItem(cloneTemplate(cardPreviewTemplate), {
+    const card = new CardItem(cloneTemplate(cardPreviewTemplate), categorySettings, {
         onClick: () => {
             events.emit(Events.CART_UPDATE, item);
             events.emit(Events.CARD_SELECT, item);
@@ -74,7 +82,7 @@ events.on(Events.CART_UPDATE, (item: IProduct | IProduct[]) => {
     cart.total = appData.cart.totalPrice;
     page.counter = appData.cart.items.length;
     cart.items = appData.cart.items.map(item => {
-        const card = new CardItemCompact(cloneTemplate(cardBasketTemplate), {
+        const card = new Card('card', cloneTemplate(cardBasketTemplate), {
             onClick: () => {
                 appData.removeCartItem(item.id);
                 events.emit(Events.CART_UPDATE, appData.cart.items);
@@ -97,30 +105,34 @@ events.on(Events.CART_OPEN, () => {
 });
 
 // Открыть форму
-events.on(Events.FORM_OPEN, (formTemplate: HTMLTemplateElement) => {
-    const form = new Form(cloneTemplate(formTemplate), events);
+events.on(Events.FORM_OPEN, () => {
     modal.render({
-        content: form.render()
+        content: orderForm.render()
     });
 });
 
-events.on(Events.FORM_SUBMIT, (formTemplate: HTMLTemplateElement) => {
-    const form = new Form(cloneTemplate(formTemplate), events);
-    modal.render({
-        content: form.render()
-    });
-});
-
-events.on(Events.ORDER_SUMBIT, () => {
-    const success = new Success(cloneTemplate(successTemplate),  {
-        onClick: () => {
-            modal.close();
-            appData.clearCart();
+events.on(Events.FORM_SUBMIT, (formName: string) => {
+    appData.order.total = appData.cart.totalPrice;
+    appData.order.items = appData.cart.items.map(item => item.id)
+    switch(formName) {
+        case formNames.ORDER: {
+            appData.order.payment = orderForm.payment.value;
+            appData.order.address = orderForm.address.value;
+            modal.render({
+                content: contactsForm.render()
+            });
+            break;
         }
-    })
-    modal.render({
-        content: success.render()
-    });
+        case formNames.CONTACTS: {
+            appData.order.email = contactsForm.email.value;
+            appData.order.phone = contactsForm.phone.value;
+            modal.render({
+                content: success.render()
+            });
+            break;
+        }
+        default: console.error('Форма не найдена')
+    }
 });
 
 // Блокируем прокрутку страницы если открыта модалка

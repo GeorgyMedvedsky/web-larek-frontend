@@ -1,12 +1,3 @@
-export interface IAppState {
-    catalog: IProduct[];
-    cart: {
-        items: IProduct[];
-        totalPrice: number;
-    };
-    order: IOrderForm;
-}
-
 export interface IProduct {
     id: string;
     description: string;
@@ -16,39 +7,14 @@ export interface IProduct {
     price: number | null;
 }
 
-export interface IOrderForm {
-    payment: string;
-    email: string;
-    phone: string;
-    address: string;
-    total: number;
-    items: string[];
-}
-
-export interface IPage {
-    catalog: HTMLElement[];
-    wrapper: HTMLElement;
-    basket: HTMLElement;
-}
-
-export interface IModalData {
-    content: HTMLElement;
-}
-
-export interface ICartView {
-    items: HTMLElement[];
-    total: number;
-}
+export type ApiListResponse<Type> = {
+    total: number,
+    items: Type[]
+};
 
 export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
 
-export type TCardItemCompact = Pick<IProduct, 'title' | 'price'>;
-
-export type CatalogChangeEvent = IProduct[];
-
-export interface ICardActions {
-    onClick: (event: MouseEvent) => void;
-}
+export type CatalogChange = IProduct[];
 
 export enum Events {
     CATALOG_UPDATE = 'catalog:update',
@@ -58,6 +24,5 @@ export enum Events {
     MODAL_CLOSE = 'modal:close',
     CART_OPEN = 'cart:open',
     FORM_OPEN = 'form:open',
-    FORM_SUBMIT = 'form:submit',
-    ORDER_SUMBIT = 'order:success'
+    FORM_SUBMIT = 'form:submit'
 }
