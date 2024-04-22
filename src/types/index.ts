@@ -12,6 +12,18 @@ export type ApiListResponse<Type> = {
     items: Type[]
 };
 
+export interface IOrderForm {
+    payment: string; 
+    email: string; 
+    phone: string; 
+    address: string;
+}
+
+export interface IOrder extends IOrderForm {
+    total: number; 
+    items: string[]; 
+}
+
 export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
 
 export type CatalogChange = IProduct[];

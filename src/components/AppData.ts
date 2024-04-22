@@ -1,6 +1,5 @@
 import { Model } from "./base/Model";
-import { IProduct } from "../types";
-import { Events } from "../types";
+import { Events, IProduct, IOrderForm, IOrder } from "../types";
 import { IEvents } from "./base/Events";
 
 interface IAppState {
@@ -10,18 +9,6 @@ interface IAppState {
         totalPrice: number;
     };
     order: IOrderForm;
-}
-
-interface IOrderForm {
-    payment: string; 
-    email: string; 
-    phone: string; 
-    address: string;
-}
-
-interface IOrder extends IOrderForm {
-    total: number; 
-    items: string[]; 
 }
 
 export class ProductItem extends Model<IProduct> {
@@ -84,6 +71,20 @@ export class AppState extends Model<IAppState> {
     }
 
     clearCart():void {
-        this.cart.items = [];
+        this.cart = {
+            items: [],
+            totalPrice: 0
+        };
+    }
+
+    clearOrder():void {
+        this.order = {
+            payment: '',
+            email: '',
+            phone: '',
+            address: '',
+            total: 0,
+            items: []
+        }
     }
 }

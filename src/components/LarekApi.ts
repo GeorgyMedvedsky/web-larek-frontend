@@ -1,9 +1,8 @@
-import { IProduct, ApiListResponse } from "../types";
+import { IProduct, ApiListResponse, IOrder } from "../types";
 import { Api } from "./base/Api";
 
-export interface ILarekApi {
-    getProductItem: (id: string) => Promise<IProduct>;
-    getProductList: () => Promise<IProduct[]>;
+interface IOrderResult {
+    id: string;
 }
 
 export class LarekApi extends Api {
@@ -14,15 +13,6 @@ export class LarekApi extends Api {
         this.cdn = cdn;
     }
 
-    getProductItem(id: string): Promise<IProduct> {
-        return this.get(`/product/${id}`).then(
-            (item: IProduct) => ({
-                ...item,
-                image: this.cdn + item.image,
-            })
-        );
-    }
-
     getProductList():Promise<IProduct[]> {
         return this.get(`/product`)
             .then((data: ApiListResponse<IProduct>) => 
@@ -31,5 +21,10 @@ export class LarekApi extends Api {
                     image: this.cdn + item.image
             }))
         );
+    }
+
+    postOrder(order: IOrder):Promise<IOrderResult> {
+        return this.post('/order', order)
+            .then((data: IOrderResult) => data)
     }
 }

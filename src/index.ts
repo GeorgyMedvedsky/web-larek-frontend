@@ -33,7 +33,6 @@ const contactsForm = new Form(cloneTemplate(formTemplates.contacts), events);
 const success = new Success(cloneTemplate(successTemplate),  {
     onClick: () => {
         modal.close();
-        appData.clearCart();
     }
 })
 
@@ -126,9 +125,13 @@ events.on(Events.FORM_SUBMIT, (formName: string) => {
         case formNames.CONTACTS: {
             appData.order.email = contactsForm.email.value;
             appData.order.phone = contactsForm.phone.value;
+            api.postOrder(appData.order);
             modal.render({
                 content: success.render()
             });
+            appData.clearCart();
+            appData.clearOrder();
+            events.emit(Events.CART_UPDATE, appData.cart.items);
             break;
         }
         default: console.error('Форма не найдена')
