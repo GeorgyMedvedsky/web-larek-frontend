@@ -1,5 +1,5 @@
 import { Model } from "./base/Model";
-import { Events, IProduct, IOrderForm, IOrder } from "../types";
+import { Events, IProduct, IOrderForm, IOrder, FormErrors } from "../types";
 import { IEvents } from "./base/Events";
 
 interface IAppState {
@@ -27,6 +27,7 @@ export class AppState extends Model<IAppState> {
         totalPrice: number;
     };
     order: IOrder;
+    formErrors: FormErrors = {};
 
     constructor(data: Partial<IAppState>, events: IEvents) {
         super(data, events);
@@ -86,5 +87,29 @@ export class AppState extends Model<IAppState> {
             total: 0,
             items: []
         }
+    }
+
+    setOrderField(field: keyof IOrderForm, value: string) {
+        this.order[field] = value;
+
+        if (this.validateOrder()) {
+            this.events.emit('order:ready', this.order);
+        }
+    }
+
+    validateOrder() {
+        const errors: typeof this.formErrors = {};
+        if (!this.order.address) {
+            errors.address = 'Необходимо указать адрес';
+        }
+        if (!this.order.email) {
+            errors.email = 'Необходимо указать email';
+        }
+        if (!this.order.phone) {
+            errors.phone = 'Необходимо указать телефон';
+        }
+        this.formErrors = errors;
+        this.events.emit(Events.FORM_ERRORS_CHANGE, this.formErrors);
+        return Object.keys(errors).length === 0;
     }
 }

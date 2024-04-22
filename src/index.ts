@@ -3,13 +3,13 @@ import { LarekApi } from './components/LarekApi';
 import { API_URL, CDN_URL, categorySettings, formNames, formTemplates } from './utils/constants';
 import { EventEmitter } from './components/base/Events';
 import { cloneTemplate, createElement, ensureElement } from "./utils/utils";
-import { Events, IProduct, CatalogChange } from './types';
+import { Events, IProduct, CatalogChange, IOrderForm, IOrder } from './types';
 import { AppState } from './components/AppData';
 import { Page } from './components/Page';
 import { Card, CardItem } from './components/common/Card';
 import { Modal } from './components/common/Modal';
 import { Cart } from './components/common/Cart';
-import { Form } from './components/common/Form';
+import { OrderForm, ContactsForm } from './components/common/Form';
 import { Success } from './components/common/Success';
 
 const events = new EventEmitter();
@@ -28,13 +28,9 @@ const appData = new AppState({}, events);
 const page = new Page(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const cart = new Cart(cloneTemplate(basketTemplate), events);
-const orderForm = new Form(cloneTemplate(formTemplates.order), events);
-const contactsForm = new Form(cloneTemplate(formTemplates.contacts), events);
-const success = new Success(cloneTemplate(successTemplate),  {
-    onClick: () => {
-        modal.close();
-    }
-})
+const orderForm = new OrderForm(cloneTemplate(formTemplates.order), events);
+const contactsForm = new ContactsForm(cloneTemplate(formTemplates.contacts), events);
+
 
 // Обновить каталог
 events.on<CatalogChange>(Events.CATALOG_UPDATE, () => {
@@ -106,8 +102,26 @@ events.on(Events.CART_OPEN, () => {
 // Открыть форму
 events.on(Events.FORM_OPEN, () => {
     modal.render({
-        content: orderForm.render()
+        content: orderForm.render({
+            address: '',
+            valid: false,
+            errors: []
+        })
     });
+});
+
+// Изменилось состояние валидации формы
+events.on(Events.FORM_ERRORS_CHANGE, (errors: Partial<IOrderForm>) => {
+    const { email, phone, address } = errors;
+    orderForm.valid = !address;
+    orderForm.errors = Object.values({address}).filter(i => !!i).join('; ');
+    contactsForm.valid = !email && !phone;
+    contactsForm.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
+});
+
+// Изменилось одно из полей
+events.on(Events.INPUT_CHANGE, (data: { field: keyof IOrderForm, value: string }) => {
+    appData.setOrderField(data.field, data.value);
 });
 
 events.on(Events.FORM_SUBMIT, (formName: string) => {
@@ -116,19 +130,18 @@ events.on(Events.FORM_SUBMIT, (formName: string) => {
     switch(formName) {
         case formNames.ORDER: {
             appData.order.payment = orderForm.payment.value;
-            appData.order.address = orderForm.address.value;
             modal.render({
-                content: contactsForm.render()
+                content: contactsForm.render({
+                    email: '',
+                    phone: '',
+                    valid: false,
+                    errors: []
+                })
             });
             break;
         }
         case formNames.CONTACTS: {
-            appData.order.email = contactsForm.email.value;
-            appData.order.phone = contactsForm.phone.value;
-            api.postOrder(appData.order);
-            modal.render({
-                content: success.render()
-            });
+            events.emit(Events.ORDER_SUBMIT, appData.order);
             appData.clearCart();
             appData.clearOrder();
             events.emit(Events.CART_UPDATE, appData.cart.items);
@@ -137,6 +150,26 @@ events.on(Events.FORM_SUBMIT, (formName: string) => {
         default: console.error('Форма не найдена')
     }
 });
+
+events.on(Events.ORDER_SUBMIT, (data: IOrder) => {
+    api.postOrder(data)
+        .then(() => {
+            const success = new Success(cloneTemplate(successTemplate),  {
+                onClick: () => {
+                    modal.close();
+                }
+            });
+
+            modal.render({
+                content: success.render({
+                    total: data.total
+                })
+            });
+        })
+        .catch(err => {
+            console.error(err);
+        });
+})
 
 // Блокируем прокрутку страницы если открыта модалка
 events.on(Events.MODAL_OPEN, () => {

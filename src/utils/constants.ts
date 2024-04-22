@@ -29,3 +29,9 @@ export const formTemplates = {
     order: ensureElement<HTMLTemplateElement>('#order'),
     contacts: ensureElement<HTMLTemplateElement>('#contacts')
 };
+
+// export const buttonValues = {
+//     add: 'В корзину',
+//     remove: 'Убрать',
+//     unavailable: 'Недоступно'
+// }

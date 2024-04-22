@@ -24,6 +24,8 @@ export interface IOrder extends IOrderForm {
     items: string[]; 
 }
 
+export type FormErrors = Partial<Record<keyof IOrder, string>>;
+
 export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
 
 export type CatalogChange = IProduct[];
@@ -36,5 +38,8 @@ export enum Events {
     MODAL_CLOSE = 'modal:close',
     CART_OPEN = 'cart:open',
     FORM_OPEN = 'form:open',
-    FORM_SUBMIT = 'form:submit'
+    FORM_SUBMIT = 'form:submit',
+    INPUT_CHANGE = 'input:change',
+    FORM_ERRORS_CHANGE = 'formErrors:change',
+    ORDER_SUBMIT = 'order:submit'
 }
