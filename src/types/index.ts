@@ -7,11 +7,6 @@ export interface IProduct {
     price: number | null;
 }
 
-export type ApiListResponse<Type> = {
-    total: number,
-    items: Type[]
-};
-
 export interface IOrderForm {
     payment: string; 
     email: string; 
@@ -24,7 +19,12 @@ export interface IOrder extends IOrderForm {
     items: string[]; 
 }
 
-export type FormErrors = Partial<Record<keyof IOrder, string>>;
+export type ApiListResponse<T> = {
+    total: number,
+    items: T[]
+}
+
+export type FormErrors = Partial<Record<keyof IOrder, string>>
 
 export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
 

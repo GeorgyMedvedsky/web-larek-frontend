@@ -16,6 +16,8 @@
 @use "../common.blocks/order";
 @use "../common.blocks/order-success";
 
+@use "../common.blocks/loader.scss";
+
 
 @use "variables" as *;
 @use "mixins";

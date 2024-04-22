@@ -31,7 +31,6 @@ const cart = new Cart(cloneTemplate(basketTemplate), events);
 const orderForm = new OrderForm(cloneTemplate(formTemplates.order), events);
 const contactsForm = new ContactsForm(cloneTemplate(formTemplates.contacts), events);
 
-
 // Обновить каталог
 events.on<CatalogChange>(Events.CATALOG_UPDATE, () => {
     page.catalog = appData.catalog.map(item => {
@@ -181,8 +180,17 @@ events.on(Events.MODAL_CLOSE, () => {
     page.locked = false;
 });
 
-api.getProductList()
-    .then(appData.setCatalog.bind(appData))
-    .catch(err => {
-        console.error(err);
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    const loader = document.getElementById('loader');
+    loader.style.display = 'block';
+
+    api.getProductList()
+        .then(appData.setCatalog.bind(appData))
+        .then(() => {
+            loader.style.display = 'none';
+        })
+        .catch(err => {
+            console.error(err);
+            loader.style.display = 'none';
+        });
+});

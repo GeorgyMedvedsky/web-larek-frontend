@@ -43,42 +43,36 @@ yarn build
 
 ## Данные и типы данных
 
-Основной стейт приложения
-
-```
-export interface IAppState {
-    catalog: IProduct[];
-    cart: {
-        items: IProduct[];
-        totalPrice: number;
-    };
-    order: IOrder;
-}
-```
-
 Товар
 
 ```
-export interface IProduct {
+interface IProduct {
     id: string;
     description: string;
     image: string;
     title: string;
     category: string;
-    price: number | null;
+    price
+}
+```
+
+Форма заполнения заказа
+
+```
+interface IOrderForm {
+    payment: string; 
+    email: string; 
+    phone: string; 
+    address: string;
 }
 ```
 
 Сформированный заказ
 
 ```
-export interface IOrder {
-    payment: string;
-    email: string;
-    phone: string;
-    address: string;
-    total: number;
-    items: string[];
+interface IOrder extends IOrderForm {
+    total: number; 
+    items: string[]; 
 }
 ```
 
@@ -92,62 +86,31 @@ export interface IPage {
 }
 ```
 
-Модальное окно
+Ответ Api
 
 ```
-export interface IModalData {
-    content: HTMLElement;
+type ApiListResponse<T> = {
+    total: number,
+    items: T[]
 }
 ```
 
-Отображение корзины
+Ошибки форм
 
 ```
-export interface ICartView {
-    items: HTMLElement[];
-    total: number;
-}
+type FormErrors = Partial<Record<keyof IOrder, string>>
 ```
 
 Базовая карточка товара
 
 ```
-export type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
-```
-
-Карточка товара в корзине
-
-```
-export type TCardItemCompact = Pick<IProduct, 'title' | 'price'>;
+type TCardItem = Pick<IProduct, 'title' | 'category'| 'image' | 'price'>;
 ```
 
 Изменение каталога
 
 ```
-export type CatalogChangeEvent = IProduct[];
-```
-
-Действие с карточкой
-
-```
-export interface ICardActions {
-    onClick: (event: MouseEvent) => void;
-}
-```
-
-События в приложении
-
-```
-export enum Events {
-    CATALOG_UPDATE = 'catalog:update',
-    CARD_SELECT = 'card:select',
-    CART_UPDATE = 'cart:update',
-    MODAL_OPEN = 'modal:open',
-    MODAL_CLOSE = 'modal:close',
-    CART_OPEN = 'cart:open',
-    FORM_OPEN = 'form:open',
-    FORM_SUBMIT = 'form:submit',
-}
+type CatalogChange = IProduct[];
 ```
 
 ## Архитектура
@@ -178,10 +141,11 @@ export enum Events {
 Принимает в конструктор объекты данных и событий
 
 #### Класс View
-Абстрактный базовый класс, отвечающий за отображение контента на странице
+Абстрактный базовый класс, отвечающий за отображение контента на странице.
+Принимает в конструктор HTML элемент в виде контейнера для контента.
+Имеет ряд методов для управления и изменения контейнера и дочерних элементов
 
 ### Слой данных
-
 Все классы слоя данных отвечают за биснес-логику приложения
 
 #### Класс ProductItem
@@ -196,10 +160,11 @@ export enum Events {
 #### Класс AppState
 Основная бизнес-логика приложения. Класс отвечает за хранение и изменение таких состояний, как:
 - `catalog` - каталог товаров,
-- `cart` - объект корзины, состоящий из коллекции добавленных товаров в поле `items` и итоговой стоимости в поле `totalPrice`.
+- `cart` - объект корзины, состоящий из коллекции добавленных товаров в поле `items` и итоговой стоимости в поле `totalPrice`,
+- `order` - данные о заказе пользователя, которые в будущем отправляются на сервер,
+- `formErrors` - поле для хранения сообщений об ошибках валидации
 
 Класс имеет методы управления всеми хранящимися в нем данными:
-- поле `order` хранит данные сформированного заказа в виде объекта и имеет свои геттер и сеттер
 
 - `setCatalog` - принимает параметром массив товаров и генерирует на его основе новый массив, который записывает в поле `catalog`, генерируя событие `CATALOG_UPDATE`(обновление каталога),
 
@@ -211,10 +176,15 @@ export enum Events {
 
 - `setTotalPrice` - принимает параметром массив товаров, высчитывает на его основе итоговую стоимость заказа и записывает полученное значение в поле `totalPrice`,
 
-- `clearCart` - очищает корзину, записывая в поле `items` пустой массив.
+- `clearCart` - очищает корзину, записывая в поле `items` пустой массив и обнуляет итоговую стоимость,
+
+- `clearOrder` - очищает объект заказа,
+
+- `setOrderField` - записывает данные из полей формы в поле `order`,
+
+- `validateOrder` - отвечает за валидацию полей
 
 ### Классы представления
-
 Все классы представления отвечают за отображение внутри контейнера (DOM-элемент) передаваемых в них данных.
 
 #### Класс Modal
@@ -232,13 +202,23 @@ export enum Events {
 - `cart` - кнопка корзины, позволяющая получить доступ к экрану корзины,
 - `wrapper` - обертка, позволяющая ограничить прокрутку страницы при открытом модальном окне.
 
-#### Класс Card, CardItem, CardItemCompact
+#### Класс Card, CardItem
 Отвечают за вариативность отрисовки всех элементов карточек товаров.
-Классы `CardItem`, `CardItemCompact` расширяют `Card`, адаптируя отображение карточки под определенные условия, заданные в приложении.
+Классы `CardItem` расширяют `Card`, адаптируя отображение карточки под определенные условия, заданные в приложении.
 Данные для отрисовки получают с помощью геттеров и сеттеров
 
 #### Класс Cart
 Отвечает за отображение корзины и имеет два сеттера для указания значений `items` - список товаров, и `total` - итоговая стоимость корзины
+
+#### Класс Form
+Отвечают за отображение форм на странице и имеет методы и поля для валидации введенных данных
+
+#### Классы OrderForm, ContactsForm
+Расширяют класс `Form`, отвечая за отрисовку каждой из форм
+
+#### Класс Success
+Отвечает за отображение уведомления о созданном заказе
+Имеет поле `total`, в которое записывается итоговая стоимость созданного заказа
 
 ### Слой коммуникации
 
@@ -249,4 +229,21 @@ export enum Events {
 
 ## Взаимодействие компонентов
 Код, описывающий взаимодействие представления и данных между собой находится в файле `index.ts`, выполняющем роль презентера.\
-Взаимодействие осуществляется за счет событий генерируемых с помощью брокера событий и обработчиков этих событий, описанных в `index.ts`
+
+События в приложении
+
+```
+export enum Events {
+    CATALOG_UPDATE = 'catalog:update',
+    CARD_SELECT = 'card:select',
+    CART_UPDATE = 'cart:update',
+    MODAL_OPEN = 'modal:open',
+    MODAL_CLOSE = 'modal:close',
+    CART_OPEN = 'cart:open',
+    FORM_OPEN = 'form:open',
+    FORM_SUBMIT = 'form:submit',
+    INPUT_CHANGE = 'input:change',
+    FORM_ERRORS_CHANGE = 'formErrors:change',
+    ORDER_SUBMIT = 'order:submit'
+}
+```
