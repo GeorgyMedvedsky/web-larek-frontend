@@ -14,7 +14,7 @@ export class LarekApi extends Api {
     }
 
     getProductList():Promise<IProduct[]> {
-        return this.get(`/product`)
+        return this.get(`/product/`)
             .then((data: ApiListResponse<IProduct>) => 
                 data.items.map((item) => ({
                     ...item,

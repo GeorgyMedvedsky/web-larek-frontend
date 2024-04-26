@@ -185,10 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loader.style.display = 'block';
 
     api.getProductList()
-        .then((res) => {
-            appData.setCatalog.bind(appData);
-            console.log(res)
-        })
+        .then(appData.setCatalog.bind(appData))
         .then(() => {
             loader.style.display = 'none';
         })
